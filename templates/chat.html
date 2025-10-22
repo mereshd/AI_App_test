@@ -232,6 +232,9 @@
             const thinkingId = addMessage('thinking', 'Thinking<span class="loading-dots"></span>');
 
             try {
+
+                console.log(JSON.stringify({ message: message }));
+
                 // Send message to backend
                 const response = await fetch('/api/chat', {
                     method: 'POST',

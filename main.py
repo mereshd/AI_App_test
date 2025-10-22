@@ -131,11 +131,13 @@ async def chat(request: Request):
 
         # Call OpenAI API
         completion = openai_client.chat.completions.create(
-            model="gpt-3.5-turbo",
+            model="gpt-4",
             messages=[
-                {"role": "system", "content": "You are a helpful assistant."},
+                {"role": "system", "content": "You are a senior data engineer who has mastered data engineering. Be very brief"},
                 {"role": "user", "content": user_message}
-            ]
+            ],
+            max_tokens=50,
+            temperature=0
         )
 
         response_message = completion.choices[0].message.content
@@ -168,21 +170,55 @@ async def parse_resume(request: Request):
             return {"error": "No HTML content provided"}
 
         # Create a prompt to parse the resume
-        system_prompt = """You are a resume parser. Extract and format the key information from HTML content (from LinkedIn profiles or resumes) into a clean, well-structured format.
-
+        system_prompt = """You are a resume parser. Extract and format the key information from HTML content (from LinkedIn profiles or resumes) into only a JSON format. 
+        Remove any HTML tags, navigation elements, or extraneous information.
 Focus on extracting:
-- Name
-- Contact information (email, phone, location)
-- Professional summary/headline
-- Work experience (company, title, dates, responsibilities)
-- Education (school, degree, dates)
-- Skills
-- Certifications (if any)
-- Projects (if any)
+{
+"name": "Random Name",
+"contact_information": {
+"location": "Bay Area"
+},
+"professional_summary": "Data Engineer @ Meta",
+"work_experience": [
+{
+"company": "Meta",
+"title": "Engineer",
+"startDate": "May 2025",
+"endDate": "Present",
+"responsibilities": "I wrote pipelines"
+}
+],
+"education": [
+{
+"school": "Stanford",
+"degree": "Bachelor's Degree, Computer Science",
+"startDate": "Not specified",
+"endDate": "Not specified"
+}
+],
+"skills": [
+"Big Data",
+"Machine Learning"
+],
+"certifications": [
+{
+"name": "Databricks Certified Professional",
+"issuer": "Databricks",
+"date": "Nov 2015"
+}
+],
+"projects": [
+{
+"name": "Some Github Repo",
+"dates": "Nov 2023 - Present",
+"description": "A list of repos or something",
+"associated_with": "DataExpert.io"
+}
+]
+}
+Format the output as clean JSON"""
 
-Format the output as clean markdown with clear sections and bullet points. Remove any HTML tags, navigation elements, or extraneous information. Make it concise and professional."""
-
-        user_prompt = f"Please parse and format this resume/profile HTML:\n\n{html_content}"
+        user_prompt = f"Please parse and format this resume into JSON:\n\n{html_content}\n\n"
 
         # Call OpenAI API
         completion = openai_client.chat.completions.create(
@@ -191,12 +227,126 @@ Format the output as clean markdown with clear sections and bullet points. Remov
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt}
             ],
-            temperature=0.3
+            temperature=0,
+            response_format={"type": "json_object"},
+            tools=[
+                {
+                    "type": "function",
+                    "function": {
+                        "name": "parse_resume",
+                        "description": "Parse resume text into a structured schema with work experience, education, skills, certifications, and projects.",
+                        "parameters": {
+                            "type": "object",
+                            "properties": {
+                                "name": {"type": "string", "description": "Full name of the person"},
+                                "contact_information": {
+                                    "type": "object",
+                                    "properties": {
+                                        "location": {"type": "string"}
+                                    },
+                                    "required": ["location"]
+                                },
+                                "professional_summary": {"type": "string"},
+                                "work_experience": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object",
+                                        "properties": {
+                                            "company": {"type": "string"},
+                                            "title": {"type": "string"},
+                                            "startDate": {"type": "string"},
+                                            "endDate": {"type": "string"},
+                                            "responsibilities": {"type": "string"}
+                                        },
+                                        "required": ["company", "title"]
+                                    }
+                                },
+                                "education": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object",
+                                        "properties": {
+                                            "school": {"type": "string"},
+                                            "degree": {"type": "string"},
+                                            "startDate": {"type": "string"},
+                                            "endDate": {"type": "string"}
+                                        },
+                                        "required": ["school", "degree"]
+                                    }
+                                },
+                                "skills": {
+                                    "type": "array",
+                                    "items": {"type": "string"}
+                                },
+                                "certifications": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object",
+                                        "properties": {
+                                            "name": {"type": "string"},
+                                            "issuer": {"type": "string"},
+                                            "date": {"type": "string"}
+                                        },
+                                        "required": ["name", "issuer"]
+                                    }
+                                },
+                                "projects": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object",
+                                        "properties": {
+                                            "name": {"type": "string"},
+                                            "dates": {"type": "string"},
+                                            "description": {"type": "string"},
+                                            "associated_with": {"type": "string"}
+                                        },
+                                        "required": ["name"]
+                                    }
+                                }
+                            },
+                            "required": ["name", "contact_information", "professional_summary"]
+                        }
+                    }
+                }
+            ]
         )
 
         parsed_resume = completion.choices[0].message.content
+        insert_resume(json.loads(parsed_resume))
 
         return {"parsed_resume": parsed_resume}
 
     except Exception as e:
         return {"error": f"Error parsing resume: {str(e)}"}
+
+
+def insert_resume(resume_json: dict) -> dict:
+    """
+    Inserts a parsed resume JSON object into the Supabase 'resumes' table.
+
+    Args:
+        resume_json (dict): Resume data matching the JSON schema.
+
+    Returns:
+        dict: The inserted row data from Supabase.
+    """
+    # Ensure valid JSON
+    if not isinstance(resume_json, dict):
+        raise ValueError("resume_json must be a Python dict")
+
+    try:
+        response = (
+            supabase.table("resumes")
+            .insert({"resume": resume_json})
+            .execute()
+        )
+
+        if response.data:
+            print("✅ Resume inserted successfully!")
+            return response.data[0]
+        else:
+            raise Exception(f"Insertion failed: {response}")
+
+    except Exception as e:
+        print(f"❌ Error inserting resume: {e}")
+        raise
