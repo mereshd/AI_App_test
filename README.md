@@ -1,21 +1,24 @@
-# Hello World App - htmx + FastAPI + Supabase
+# App Supabase + Pubnub + Render
 
-A full-stack application boilerplate with htmx frontend, FastAPI backend, Supabase database, and Render deployment configuration.
+An application boilerplate with Pubnub, Supabase database, and Render deployment configuration.
 
 ## Project Structure
 
 ```
-base-app/
-├── backend/
-│   ├── main.py              # FastAPI application
-│   ├── requirements.txt     # Python dependencies
-│   ├── templates/
-│   │   └── index.html      # Main htmx template
-│   └── .env.example        # Environment variables template
-├── frontend/
-│   └── README.md           # Frontend documentation
-├── render.yaml             # Render deployment config
-└── README.md
+ai-application-october-2025/
+├── .env.example
+├── .gitignore
+├── README.md
+├── data/
+│   └── synthetic_profiles.json
+├── main.py
+├── render.yaml
+├── requirements.txt
+└── templates/
+    ├── chat.html
+    ├── index.html
+    ├── pingpong.html
+    └── resume.html
 ```
 
 ## Prerequisites
@@ -72,11 +75,12 @@ uvicorn main:app --reload --port 8000
 The application will be available at http://localhost:8000
 
 ## Environment Variables
-
-### Backend (.env)
 ```
-SUPABASE_URL=https://your-project.supabase.co
-SUPABASE_KEY=your-supabase-anon-key
+SUPABASE_URL=https://example.supabase.co
+SUPABASE_KEY=
+OPENAI_API_KEY=
+PUBNUB_PUBLISH_KEY=demo
+PUBNUB_SUBSCRIBE_KEY=demo
 ```
 
 ## Deployment to Render
@@ -88,49 +92,22 @@ SUPABASE_KEY=your-supabase-anon-key
 3. Click "New" > "Web Service"
 4. Connect your repository
 5. Configure:
-   - Name: `htmx-fastapi-app`
-   - Runtime: `Python 3`
-   - Build Command: `pip install -r backend/requirements.txt`
-   - Start Command: `cd backend && uvicorn main:app --host 0.0.0.0 --port $PORT`
+   - Name: `ai-application-october-2025`
+   - Build Command: `pip install -r requirements.txt`
+   - Start Command: `uvicorn main:app --host 0.0.0.0 --port $PORT`
 6. Add environment variables:
    - `SUPABASE_URL`
    - `SUPABASE_KEY`
+   - `OPENAI_API_KEY`
+   - `PUBNUB_PUBLISH_KEY`
+   - `PUBNUB_SUBSCRIBE_KEY`
 
-The entire application (frontend + backend) is now served from a single web service!
+The entire application is now served from a single web service!
 
 ## API Endpoints
 
-- `GET /` - Main application page (HTML)
-- `GET /api/health` - Health check (JSON)
-- `GET /api/message` - Backend message (HTML fragment)
-- `GET /api/data` - Fetch data from Supabase (HTML fragment)
-
-## Features
-
-- htmx for dynamic content without full page reloads
-- FastAPI backend serving HTML templates with Jinja2
-- Supabase integration for database
-- No build process required - simple deployment
-- Single service deployment (no separate frontend/backend)
-- Much smaller footprint than React (htmx is ~14KB vs React ~140KB)
-
-## Benefits of htmx over React
-
-- **Simpler**: No complex build tooling, bundlers, or transpilers
-- **Smaller**: Dramatically reduced bundle size
-- **Faster**: Server-rendered HTML loads instantly
-- **Easier to deploy**: Single service instead of two
-- **Lower cost**: One Render service instead of two
-- **More maintainable**: Less JavaScript, more HTML
-
-## Next Steps
-
-- Add authentication with Supabase Auth
-- Implement CRUD operations with htmx forms
-- Add proper error handling
-- Add CSS framework (Tailwind, etc.)
-- Add tests
-- Configure CI/CD
+- `/chat` - For chatbot
+- `/pingpong` - For Pubnub testing
 
 ## License
 
