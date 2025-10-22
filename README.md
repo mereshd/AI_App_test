@@ -33,7 +33,7 @@ ai-application-october-2025/
 
 ```bash
 git clone <your-repo-url>
-cd base-app
+cd <your-repo-name>
 ```
 
 ### 2. Set up Supabase
@@ -57,7 +57,6 @@ cd base-app
 
 ```bash
 # Create and activate virtual environment
-cd backend
 python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 
