@@ -1,0 +1,7 @@
+fastapi
+uvicorn
+supabase
+python-dotenv
+jinja2
+pubnub
+openai
