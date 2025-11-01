@@ -7,3 +7,6 @@ pubnub
 openai
 requests
 PyGithub
+python-multipart
+PyPDF2
+pillow

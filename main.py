@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, File, UploadFile, Form
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -8,6 +8,11 @@ from pubnub.pubnub import PubNub
 from openai import OpenAI
 import os
 import json
+import base64
+from typing import Optional
+import io
+from PyPDF2 import PdfReader
+from PIL import Image
 
 from supabase_lib import query_rag_content
 from dotenv import load_dotenv
@@ -350,7 +355,28 @@ Format the output as clean JSON"""
             ]
         )
 
-        parsed_resume = completion.choices[0].message.tool_calls[0].function.arguments
+        # Check if the response has tool calls
+        parsed_json = None
+        if (hasattr(completion.choices[0].message, 'tool_calls') and
+            completion.choices[0].message.tool_calls and
+            len(completion.choices[0].message.tool_calls) > 0):
+            # Extract parsed resume from tool calls
+            parsed_resume = completion.choices[0].message.tool_calls[0].function.arguments
+            parsed_json = json.loads(parsed_resume)
+        else:
+            # If no tool calls, try to parse the content directly
+            try:
+                content = completion.choices[0].message.content
+                parsed_json = json.loads(content)
+                parsed_resume = content
+            except (json.JSONDecodeError, TypeError) as e:
+                print(f"Error parsing JSON from response: {str(e)}")
+                return {"error": "Failed to parse resume. The AI response was not in the expected format."}
+
+        # Validate that we have a valid JSON object
+        if not parsed_json or not isinstance(parsed_json, dict):
+            return {"error": "Failed to parse resume. The response did not contain valid resume data."}
+
         embedding_response = openai_client.embeddings.create(
             input=parsed_resume,
             model='text-embedding-3-small'
@@ -372,7 +398,7 @@ Format the output as clean JSON"""
                 if item['similarity'] > .3:
                     profile_items.append(item.get('context', ''))
 
-        insert_resume(json.loads(parsed_resume))
+        insert_resume(parsed_json)
 
         return {"parsed_resume": parsed_resume, 'jobs': job_items, 'profiles': profile_items}
 
@@ -383,23 +409,35 @@ Format the output as clean JSON"""
 
 
 @app.post("/api/parse-resume")
-async def parse_resume(request: Request):
-    """Parse HTML resume/LinkedIn profile using OpenAI"""
+async def parse_resume(
+    request: Request,
+    file: Optional[UploadFile] = File(None),
+    html_content: Optional[str] = Form(None)
+):
+    """
+    Parse resume from multiple formats (HTML, PDF, or image) using OpenAI
+    Accepts either an uploaded file (PDF or image) or HTML content
+    """
     if not openai_client:
         return {
             "error": "OpenAI API key not configured. Please add OPENAI_API_KEY to your .env file."
         }
 
     try:
-        body = await request.json()
-        html_content = body.get("html_content", "")
+        # Check if we have valid input
+        if not file and not html_content:
+            # Fallback to JSON request body for backward compatibility
+            try:
+                body = await request.json()
+                html_content = body.get("html_content", "")
+                if not html_content:
+                    return {"error": "No content provided. Please provide either a file or HTML content."}
+            except:
+                return {"error": "No content provided. Please provide either a file or HTML content."}
 
-        if not html_content:
-            return {"error": "No HTML content provided"}
-
-        # Create a prompt to parse the resume
-        system_prompt = """You are a resume parser. Extract and format the key information from HTML content (from LinkedIn profiles or resumes) into only a JSON format. 
-        Remove any HTML tags, navigation elements, or extraneous information.
+        # Create the system prompt for resume parsing
+        system_prompt = """You are a resume parser. Extract and format the key information from the provided content (HTML, PDF, or image of LinkedIn profiles or resumes) into only a JSON format.
+        Remove any tags, navigation elements, or extraneous information.
 Focus on extracting:
 {
 "name": "Random Name",
@@ -446,16 +484,71 @@ Focus on extracting:
 }
 Format the output as clean JSON"""
 
-        user_prompt = f"Please parse and format this resume into JSON:\n\n{html_content}\n\n"
+        # Process input based on type
+        messages = [{"role": "system", "content": system_prompt}]
 
-        print('user prompt is', user_prompt)
-        # Call OpenAI API
+        if file:
+            content_type = file.content_type
+            file_content = await file.read()
+
+            if content_type.startswith("image/"):
+                # Process image file
+                # Convert image to base64
+                encoded_image = base64.b64encode(file_content).decode("utf-8")
+                image_url = f"data:{content_type};base64,{encoded_image}"
+
+                messages.append({
+                    "role": "user",
+                    "content": [
+                        {"type": "text", "text": "Please parse and format this resume image into JSON:"},
+                        {"type": "image_url", "image_url": {"url": image_url}}
+                    ]
+                })
+
+            elif content_type == "application/pdf":
+                # Process PDF file
+                try:
+                    # Convert PDF to text
+                    pdf_text = ""
+                    pdf_reader = PdfReader(io.BytesIO(file_content))
+                    for page in pdf_reader.pages:
+                        pdf_text += page.extract_text()
+
+                    # For longer PDFs, we'll use the Files API
+                    if len(pdf_text) > 4000:  # Arbitrary threshold, adjust as needed
+                        # Upload PDF file to OpenAI
+                        file_response = openai_client.files.create(
+                            file=io.BytesIO(file_content),
+                            purpose="assistants"
+                        )
+
+                        # Get file URL
+                        file_id = file_response.id
+
+                        messages.append({
+                            "role": "user",
+                            "content": f"Please parse and format this resume PDF into JSON. The PDF is attached as file ID: {file_id}"
+                        })
+                    else:
+                        # For shorter PDFs, we can just use the extracted text
+                        messages.append({
+                            "role": "user",
+                            "content": f"Please parse and format this resume PDF into JSON:\n\n{pdf_text}\n\n"
+                        })
+                except Exception as e:
+                    print(f"Error processing PDF: {str(e)}")
+                    return {"error": f"Error processing PDF: {str(e)}"}
+            else:
+                return {"error": f"Unsupported file type: {content_type}. Please upload a PDF or image file."}
+        else:
+            # Process HTML content
+            messages.append({"role": "user", "content": f"Please parse and format this resume into JSON:\n\n{html_content}\n\n"})
+
+        print('Processing resume with OpenAI...')
+        # Call OpenAI API with appropriate model and format
         completion = openai_client.chat.completions.create(
             model="gpt-4o",
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_prompt}
-            ],
+            messages=messages,
             temperature=0,
             response_format={"type": "json_object"},
             tools=[
@@ -540,11 +633,32 @@ Format the output as clean JSON"""
             ]
         )
 
-        parsed_resume = completion.choices[0].message.tool_calls[0].function.arguments
+        # Check if the response has tool calls
+        parsed_json = None
+        if (hasattr(completion.choices[0].message, 'tool_calls') and
+            completion.choices[0].message.tool_calls and
+            len(completion.choices[0].message.tool_calls) > 0):
+            # Extract parsed resume from tool calls
+            parsed_resume = completion.choices[0].message.tool_calls[0].function.arguments
+            parsed_json = json.loads(parsed_resume)
+        else:
+            # If no tool calls, try to parse the content directly
+            try:
+                content = completion.choices[0].message.content
+                parsed_json = json.loads(content)
+                parsed_resume = content
+            except (json.JSONDecodeError, TypeError) as e:
+                print(f"Error parsing JSON from response: {str(e)}")
+                return {"error": "Failed to parse resume. The AI response was not in the expected format."}
 
-        insert_resume(json.loads(parsed_resume))
+        # Validate that we have a valid JSON object
+        if not parsed_json or not isinstance(parsed_json, dict):
+            return {"error": "Failed to parse resume. The response did not contain valid resume data."}
 
-        return {"parsed_resume": parsed_resume}
+        # Insert into database
+        insert_resume(parsed_json)
+
+        return {"parsed_resume": parsed_resume, "source_type": "pdf" if file and file.content_type == "application/pdf" else "image" if file else "html"}
 
     except Exception as e:
         print(str(e))

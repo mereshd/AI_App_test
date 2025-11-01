@@ -205,6 +205,74 @@
             margin: 5px 0;
         }
 
+        /* Input tabs styling */
+        .input-tabs {
+            display: flex;
+            margin-bottom: 10px;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .tab-btn {
+            background: none;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-weight: 600;
+            color: #666;
+            border-bottom: 3px solid transparent;
+            margin: 0;
+            transition: all 0.2s;
+        }
+
+        .tab-btn:hover {
+            color: #667eea;
+            transform: none;
+            box-shadow: none;
+            background: none;
+        }
+
+        .tab-btn.active {
+            color: #667eea;
+            border-bottom: 3px solid #667eea;
+        }
+
+        .input-option {
+            display: none;
+            flex-direction: column;
+            flex: 1;
+        }
+
+        .input-option.active {
+            display: flex;
+        }
+
+        .file-upload-area {
+            flex: 1;
+            border: 2px dashed #e9ecef;
+            border-radius: 10px;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 200px;
+        }
+
+        .file-upload-area:hover {
+            border-color: #667eea;
+        }
+
+        .file-info {
+            color: #888;
+            margin-top: 15px;
+        }
+
+        .selected-file-name {
+            margin-top: 10px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
         @media (max-width: 900px) {
             .content-wrapper {
                 grid-template-columns: 1fr;
@@ -220,11 +288,24 @@
 
         <div class="content-wrapper">
             <div class="input-section">
-                <div class="section-title">Input HTML</div>
-                <textarea
-                    id="html-input"
-                    placeholder="Paste your LinkedIn profile HTML or resume HTML here...&#10;&#10;Tip: On LinkedIn, right-click on your profile section and select 'Inspect' or 'View Page Source' to copy the HTML."
-                ></textarea>
+                <div class="section-title">Input Options</div>
+                <div class="input-tabs">
+                    <button class="tab-btn active" id="html-tab">HTML</button>
+                    <button class="tab-btn" id="file-tab">File Upload</button>
+                </div>
+                <div id="html-input-container" class="input-option active">
+                    <textarea
+                        id="html-input"
+                        placeholder="Paste your LinkedIn profile HTML or resume HTML here...&#10;&#10;Tip: On LinkedIn, right-click on your profile section and select 'Inspect' or 'View Page Source' to copy the HTML."
+                    ></textarea>
+                </div>
+                <div id="file-input-container" class="input-option">
+                    <div class="file-upload-area">
+                        <input type="file" id="file-input" accept=".pdf,.jpg,.jpeg,.png" />
+                        <p class="file-info">Supported formats: PDF, JPG, PNG</p>
+                        <p class="selected-file-name"></p>
+                    </div>
+                </div>
                 <button id="parse-btn" onclick="parseResume()">Parse Resume</button>
             </div>
 
@@ -245,20 +326,58 @@
 
     <script>
         const htmlInput = document.getElementById('html-input');
+        const fileInput = document.getElementById('file-input');
+        const htmlTab = document.getElementById('html-tab');
+        const fileTab = document.getElementById('file-tab');
+        const htmlInputContainer = document.getElementById('html-input-container');
+        const fileInputContainer = document.getElementById('file-input-container');
+        const selectedFileName = document.querySelector('.selected-file-name');
         const outputBox = document.getElementById('output-box');
         const parseBtn = document.getElementById('parse-btn');
         const actionButtons = document.getElementById('action-buttons');
         const errorContainer = document.getElementById('error-container');
         let parsedText = '';
+        let activeInputType = 'html'; // Default input type
+
+        // Setup tab switching
+        htmlTab.addEventListener('click', () => switchTab('html'));
+        fileTab.addEventListener('click', () => switchTab('file'));
+
+        // Handle file selection
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                const file = e.target.files[0];
+                selectedFileName.textContent = file.name;
+
+                // Validate file type
+                const validTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
+                if (!validTypes.includes(file.type)) {
+                    showError('Unsupported file type. Please upload a PDF or image file (jpg, jpeg, png).');
+                    fileInput.value = '';
+                    selectedFileName.textContent = '';
+                }
+            } else {
+                selectedFileName.textContent = '';
+            }
+        });
+
+        function switchTab(tabType) {
+            activeInputType = tabType;
+
+            if (tabType === 'html') {
+                htmlTab.classList.add('active');
+                fileTab.classList.remove('active');
+                htmlInputContainer.classList.add('active');
+                fileInputContainer.classList.remove('active');
+            } else {
+                fileTab.classList.add('active');
+                htmlTab.classList.remove('active');
+                fileInputContainer.classList.add('active');
+                htmlInputContainer.classList.remove('active');
+            }
+        }
 
         async function parseResume() {
-            const htmlContent = htmlInput.value.trim();
-
-            if (!htmlContent) {
-                showError('Please paste some HTML content to parse.');
-                return;
-            }
-
             // Clear any previous errors
             errorContainer.innerHTML = '';
 
@@ -269,13 +388,40 @@
             actionButtons.style.display = 'none';
 
             try {
-                const response = await fetch('/api/parse-resume', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ html_content: htmlContent })
-                });
+                let response;
+
+                if (activeInputType === 'html') {
+                    const htmlContent = htmlInput.value.trim();
+
+                    if (!htmlContent) {
+                        showError('Please paste some HTML content to parse.');
+                        resetOutputBox();
+                        return;
+                    }
+
+                    response = await fetch('/api/parse-resume', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ html_content: htmlContent })
+                    });
+                } else {
+                    // File upload case
+                    if (!fileInput.files || fileInput.files.length === 0) {
+                        showError('Please select a file to upload.');
+                        resetOutputBox();
+                        return;
+                    }
+
+                    const formData = new FormData();
+                    formData.append('file', fileInput.files[0]);
+
+                    response = await fetch('/api/parse-resume', {
+                        method: 'POST',
+                        body: formData
+                    });
+                }
 
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
@@ -285,8 +431,7 @@
 
                 if (data.error) {
                     showError(data.error);
-                    outputBox.className = 'output-box empty';
-                    outputBox.innerHTML = 'Parsed resume will appear here...';
+                    resetOutputBox();
                 } else {
                     parsedText = data.parsed_resume;
                     displayParsedResume(parsedText);
@@ -294,12 +439,16 @@
                 }
             } catch (error) {
                 console.error('Error:', error);
-                showError('Failed to parse resume. Please check your OpenAI API key and try again.');
-                outputBox.className = 'output-box empty';
-                outputBox.innerHTML = 'Parsed resume will appear here...';
+                showError('Failed to parse resume. Please check your input and try again.');
+                resetOutputBox();
             } finally {
                 parseBtn.disabled = false;
             }
+        }
+
+        function resetOutputBox() {
+            outputBox.className = 'output-box empty';
+            outputBox.innerHTML = 'Parsed resume will appear here...';
         }
 
         function displayParsedResume(content) {
@@ -342,6 +491,8 @@
 
         function clearAll() {
             htmlInput.value = '';
+            fileInput.value = '';
+            selectedFileName.textContent = '';
             outputBox.className = 'output-box empty';
             outputBox.innerHTML = 'Parsed resume will appear here...';
             actionButtons.style.display = 'none';
