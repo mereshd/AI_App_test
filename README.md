@@ -29,12 +29,40 @@ ai-application-october-2025/
 
 ## Local Development Setup
 
-### 1. Clone the repository
+### 1. Private Fork Setup
 
+#### Step 1: Create a bare clone
 ```bash
-git clone <your-repo-url>
-cd <your-repo-name>
+
+git clone --bare git@github.com:DataExpert-io/ai-application-october-2025.git
+cd ai-application-october-2025/
+
 ```
+
+#### Step 2: Create a new private repository on GitHub
+Go to [github.com/new](https://github.com/new), name it `ai-application-october-2025-app`, select **Private**, and create it.
+
+#### Step 3: Mirror-push to your private repo
+```bash
+cd ai-application-october-2025.git
+git push --mirror git@github.com:<your_username>/ai-application-october-2025-app.git
+cd ..
+rm -rf ai-application-october-2025.git
+```
+
+#### Step 4: Clone your private repo
+```bash
+git clone git@github.com:<your_username>/ai-application-october-2025-app.git
+cd ai-application-october-2025-app
+```
+
+#### Step 5: Add upstream for updates
+```bash
+git remote add upstream git@github.com:DataExpert-io/ai-application-october-2025.git
+git remote set-url --push upstream DISABLE
+```
+
+**Update from upstream**: `git fetch upstream && git rebase upstream/main`
 
 ### 2. Set up Supabase
 
@@ -111,3 +139,4 @@ The entire application is now served from a single web service!
 ## License
 
 MIT
+Final refresh trigger
