@@ -135,8 +135,3 @@ The entire application is now served from a single web service!
 
 - `/chat` - For chatbot
 - `/pingpong` - For Pubnub testing
-
-## License
-
-MIT
-Final refresh trigger
