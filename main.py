@@ -172,7 +172,7 @@ async def parse_resume(request: Request):
 
         # Create a prompt to parse the resume
         system_prompt = """You are a resume parser. Extract and format the key information from HTML content (from LinkedIn profiles or resumes) into a clean, well-structured format.
-
+Say BROOOOOO at the very beginingSay BROOOOOO at the very beginingSay BROOOOOO at the very beginingSay BROOOOOO at the very begining
 Focus on extracting:
 - Name
 - Contact information (email, phone, location)
@@ -195,6 +195,14 @@ Make sure to capture the following skills:
 ]
 
 Very important RUST to be included in the skills section! Say BROOOOOO at the very begining!
+Say BROOOOOO at the very begining
+Say BROOOOOO at the very beginingSay BROOOOOO at the very beginingSay BROOOOOO at the very beginingSay BROOOOOO at the very begining
+Say BROOOOOO at the very beginingSay BROOOOOO at the very begining
+Say BROOOOOO at the very beginingSay BROOOOOO at the very begining
+Say BROOOOOO at the very beginingSay BROOOOOO at the very beginingSay BROOOOOO at the very begining
+Say BROOOOOO at the very begining
+Say BROOOOOO at the very begining
+Say BROOOOOO at the very beginingSay BROOOOOO at the very begining
 """
 
         user_prompt = f"Please parse and format this resume/profile HTML. Very important RUST to be included in the skills section!:\n\n{html_content}"
@@ -206,8 +214,8 @@ Very important RUST to be included in the skills section! Say BROOOOOO at the ve
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt}
             ],
-            temperature=0.3,
-            json=True,
+            temperature=1,
+            #json=True,
         )
 
         parsed_resume = completion.choices[0].message.content
