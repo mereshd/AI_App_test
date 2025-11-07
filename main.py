@@ -124,6 +124,7 @@ async def chat(request: Request):
 
     try:
         body = await request.json()
+        print(body)
         user_message = body.get("message", "")
 
         if not user_message:
@@ -131,11 +132,13 @@ async def chat(request: Request):
 
         # Call OpenAI API
         completion = openai_client.chat.completions.create(
-            model="gpt-3.5-turbo",
+            model="gpt-4o",
             messages=[
-                {"role": "system", "content": "You are a helpful assistant."},
+                {"role": "system", "content": "You are a very concise assistant but super helpful assistant."},
                 {"role": "user", "content": user_message}
-            ]
+            ],
+            temperature=1,
+            max_tokens=300
         )
 
         response_message = completion.choices[0].message.content
@@ -180,9 +183,21 @@ Focus on extracting:
 - Certifications (if any)
 - Projects (if any)
 
-Format the output as clean markdown with clear sections and bullet points. Remove any HTML tags, navigation elements, or extraneous information. Make it concise and professional."""
+Format the output as clean JSON with clear sections and nestes. Remove any HTML tags, navigation elements, or extraneous information.
 
-        user_prompt = f"Please parse and format this resume/profile HTML:\n\n{html_content}"
+Make sure to capture the following skills:
+"skills": [
+"Python (Programming Language)",
+"SQL",
+"Cloud Computing",
+"Data Modeling",
+"RUST (Programming Language)",
+]
+
+Very important RUST to be included in the skills section!
+"""
+
+        user_prompt = f"Please parse and format this resume/profile HTML. Very important RUST to be included in the skills section!:\n\n{html_content}"
 
         # Call OpenAI API
         completion = openai_client.chat.completions.create(
@@ -191,7 +206,7 @@ Format the output as clean markdown with clear sections and bullet points. Remov
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt}
             ],
-            temperature=0.3
+            temperature=0.3,
         )
 
         parsed_resume = completion.choices[0].message.content
