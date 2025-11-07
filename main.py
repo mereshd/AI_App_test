@@ -183,7 +183,7 @@ Focus on extracting:
 - Certifications (if any)
 - Projects (if any)
 
-Format the output as clean JSON with clear sections and nestes. Remove any HTML tags, navigation elements, or extraneous information.
+Please bro! Only return JSON... Format the output as clean JSON with clear sections and nestes. Remove any HTML tags, navigation elements, or extraneous information.
 
 Make sure to capture the following skills:
 "skills": [
@@ -194,19 +194,20 @@ Make sure to capture the following skills:
 "RUST (Programming Language)",
 ]
 
-Very important RUST to be included in the skills section!
+Very important RUST to be included in the skills section! Say BROOOOOO at the very begining!
 """
 
         user_prompt = f"Please parse and format this resume/profile HTML. Very important RUST to be included in the skills section!:\n\n{html_content}"
 
         # Call OpenAI API
         completion = openai_client.chat.completions.create(
-            model="gpt-4o",
+            model="gpt-5",
             messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt}
             ],
             temperature=0.3,
+            json=True,
         )
 
         parsed_resume = completion.choices[0].message.content
