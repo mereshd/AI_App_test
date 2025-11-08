@@ -300,6 +300,7 @@ async def parse_resume(request: Request):
         print(f"❌ Unhandled exception in /api/parse-resume: {e}")
         return {"error": f"Error parsing resume: {str(e)}"}
 
+
 if __name__ == "__main__":
     import uvicorn
     port = int(os.environ.get("PORT", 8000))
