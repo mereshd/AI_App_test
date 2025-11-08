@@ -103,6 +103,9 @@
             border-radius: 10px;
             overflow-y: auto;
             min-height: 400px;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            word-wrap: break-word;
         }
 
         .output-box.empty {
@@ -164,6 +167,15 @@
             border: 1px solid #f5c6cb;
         }
 
+        .success-message {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 10px;
+            border: 1px solid #c3e6cb;
+        }
+
         .loading-dots {
             display: inline-block;
         }
@@ -177,32 +189,6 @@
             0%, 20% { content: '.'; }
             40% { content: '..'; }
             60%, 100% { content: '...'; }
-        }
-
-        .parsed-content {
-            line-height: 1.6;
-            color: #333;
-        }
-
-        .parsed-content h2 {
-            color: #667eea;
-            border-bottom: 2px solid #667eea;
-            padding-bottom: 5px;
-            margin-top: 20px;
-        }
-
-        .parsed-content h3 {
-            color: #764ba2;
-            margin-top: 15px;
-        }
-
-        .parsed-content ul {
-            margin: 10px 0;
-            padding-left: 25px;
-        }
-
-        .parsed-content li {
-            margin: 5px 0;
         }
 
         @media (max-width: 900px) {
@@ -249,7 +235,7 @@
         const parseBtn = document.getElementById('parse-btn');
         const actionButtons = document.getElementById('action-buttons');
         const errorContainer = document.getElementById('error-container');
-        let parsedText = '';
+        let parsedData = null;
 
         async function parseResume() {
             const htmlContent = htmlInput.value.trim();
@@ -259,7 +245,7 @@
                 return;
             }
 
-            // Clear any previous errors
+            // Clear any previous messages
             errorContainer.innerHTML = '';
 
             // Update UI to loading state
@@ -277,43 +263,39 @@
                     body: JSON.stringify({ html_content: htmlContent })
                 });
 
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-
                 const data = await response.json();
+                console.log('API Response:', data);
 
                 if (data.error) {
                     showError(data.error);
                     outputBox.className = 'output-box empty';
                     outputBox.innerHTML = 'Parsed resume will appear here...';
-                } else {
-                    parsedText = data.parsed_resume;
-                    displayParsedResume(parsedText);
+                } else if (data.parsed_resume) {
+                    parsedData = data.parsed_resume;
+                    
+                    // Display raw JSON
+                    outputBox.className = 'output-box';
+                    outputBox.textContent = JSON.stringify(data.parsed_resume, null, 2);
+                    
                     actionButtons.style.display = 'flex';
+                    
+                    // Show success message if saved to database
+                    if (data.insert_result && data.insert_result.success) {
+                        showSuccess('Resume parsed and saved to database!');
+                    }
+                } else {
+                    showError('Unexpected response format from server');
+                    outputBox.className = 'output-box empty';
+                    outputBox.innerHTML = 'Parsed resume will appear here...';
                 }
             } catch (error) {
                 console.error('Error:', error);
-                showError('Failed to parse resume. Please check your OpenAI API key and try again.');
+                showError(`Failed to parse resume: ${error.message}`);
                 outputBox.className = 'output-box empty';
                 outputBox.innerHTML = 'Parsed resume will appear here...';
             } finally {
                 parseBtn.disabled = false;
             }
-        }
-
-        function displayParsedResume(content) {
-            outputBox.className = 'output-box';
-
-            // Convert markdown-like formatting to HTML
-            let formattedContent = content
-                .replace(/\n/g, '<br>')
-                .replace(/## (.*?)<br>/g, '<h2>$1</h2>')
-                .replace(/### (.*?)<br>/g, '<h3>$1</h3>')
-                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                .replace(/\*(.*?)\*/g, '<em>$1</em>');
-
-            outputBox.innerHTML = `<div class="parsed-content">${formattedContent}</div>`;
         }
 
         function showError(message) {
@@ -323,11 +305,20 @@
             }, 5000);
         }
 
+        function showSuccess(message) {
+            errorContainer.innerHTML = `<div class="success-message">${message}</div>`;
+            setTimeout(() => {
+                errorContainer.innerHTML = '';
+            }, 5000);
+        }
+
         async function copyToClipboard() {
-            if (!parsedText) return;
+            if (!parsedData) return;
 
             try {
-                await navigator.clipboard.writeText(parsedText);
+                const jsonString = JSON.stringify(parsedData, null, 2);
+                await navigator.clipboard.writeText(jsonString);
+                
                 // Temporarily change button text
                 const btn = event.target;
                 const originalText = btn.textContent;
@@ -345,7 +336,7 @@
             outputBox.className = 'output-box empty';
             outputBox.innerHTML = 'Parsed resume will appear here...';
             actionButtons.style.display = 'none';
-            parsedText = '';
+            parsedData = null;
             errorContainer.innerHTML = '';
         }
 
