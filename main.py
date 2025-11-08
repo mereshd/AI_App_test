@@ -747,7 +747,6 @@ async def parse_resume(request: Request):
         return {"error": f"Error parsing resume: {str(e)}"}
 
 
-
 def insert_resume_job(resume_job_json: dict) -> dict:
     """
     Inserts a parsed resume JSON object into the Supabase 'resumes' table.

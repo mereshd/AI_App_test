@@ -1,0 +1,49 @@
+name: LLM Code Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  llm-code-review:
+    runs-on: ubuntu-latest
+    name: AI-Powered Code Review
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run AI Code Review
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REF: ${{ secrets.GITHUB_REF }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          OPENAI_API_MODEL: "gpt-4o-mini"
+          EXCLUDE: "**/*.json,**/*.md,**/*.txt,**/package-lock.json,**/yarn.lock,**/uv.lock"
+        run: |
+          python ai_code_reviewer.py
+
+      - name: Summary
+        run: |
+          echo "### AI Code Review Completed" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Review posted as PR comment" >> $GITHUB_STEP_SUMMARY

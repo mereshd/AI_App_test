@@ -1,0 +1,852 @@
+[
+  {
+    "id": 1,
+    "title": "Analytics Manager",
+    "company": "Lumen Labs",
+    "location": "Toronto, Canada",
+    "employment_type": "Internship",
+    "skills": [
+      "Data Governance",
+      "Power BI",
+      "Azure",
+      "Fivetran",
+      "dbt"
+    ],
+    "experience_level": "Entry",
+    "salary_range": "$100,000 - $130,000",
+    "description": "Work on building, optimizing, and maintaining modern data systems and pipelines to support analytics and AI initiatives."
+  },
+  {
+    "id": 2,
+    "title": "Analytics Manager",
+    "company": "Insight Dataworks",
+    "location": "San Francisco, CA, USA",
+    "employment_type": "Full-time",
+    "skills": [
+      "Fivetran",
+      "TensorFlow",
+      "Databricks",
+      "Data Modeling",
+      "Airflow"
+    ],
+    "experience_level": "Mid",
+    "salary_range": "AUD $95,000 - $115,000",
+    "description": "Work on building, optimizing, and maintaining modern data systems and pipelines to support analytics and AI initiatives."
+  },
+  {
+    "id": 3,
+    "title": "Chief Data Officer",
+    "company": "CloudDatum Partners",
+    "location": "Amsterdam, Netherlands",
+    "employment_type": "Remote",
+    "skills": [
+      "Looker",
+      "Tableau",
+      "Kafka",
+      "Terraform",
+      "TensorFlow"
+    ],
+    "experience_level": "Mid",
+    "salary_range": "\u20ac90,000 - \u20ac120,000",
+    "description": "Work on building, optimizing, and maintaining modern data systems and pipelines to support analytics and AI initiatives."
+  },
+  {
+    "id": 4,
+    "title": "Analytics Engineer",
+    "company": "Nimbus Studio",
+    "location": "Toronto, Canada",
+    "employment_type": "Remote",
+    "skills": [
+      "SQL",
+      "Snowflake",
+      "Databricks",
+      "Python",
+      "Data Quality"
+    ],
+    "experience_level": "Mid",
+    "salary_range": "AUD $95,000 - $115,000",
+    "description": "Work on building, optimizing, and maintaining modern data systems and pipelines to support analytics and AI initiatives."
+  },
+  {
+    "id": 5,
+    "title": "Applied Scientist",
+    "company": "Neura Technologies",
+    "location": "San Francisco, CA, USA",
+    "employment_type": "Internship",
+    "skills": [
+      "Kubernetes",
+      "LLMs",
+      "ETL",
+      "AWS",
+      "TensorFlow"
+    ],
+    "experience_level": "Mid",
+    "salary_range": "$120,000 - $150,000",
+    "description": "Work on building, optimizing, and maintaining modern data systems and pipelines to support analytics and AI initiatives."
+  },
+  {
+    "id": 6,
+    "title": "AI Research Scientist",
+    "company": "Insight Studio",
+    "location": "Amsterdam, Netherlands",
+    "employment_type": "Remote",
+    "skills": [
+      "Data Catalog",
+      "PyTorch",
+      "Kubernetes",
+      "Looker",
+      "Airflow"
+    ],
+    "experience_level": "Mid",
+    "salary_range": "$120,000 - $150,000",
+    "description": "Work on building, optimizing, and maintaining modern data systems and pipelines to support analytics and AI initiatives."
+  },
+  {
+    "id": 7,
+    "title": "SQL Developer",
+    "company": "Neura AI",
+    "location": "Singapore",
+    "employment_type": "Internship",
+    "skills": [
+      "Looker",
+      "Kafka",
+      "Scikit-learn",
+      "Azure",
+      "NLP"
+    ],
+    "experience_level": "Entry",
+    "salary_range": "\u00a360,000 - \u00a385,000",
+    "description": "Work on building, optimizing, and maintaining modern data systems and pipelines to support analytics and AI initiatives."
+  },
+  {
+    "id": 8,
+    "title": "Machine Learning Engineer",
+    "company": "Zenith Labs",
+    "location": "New York, NY, USA",
+    "employment_type": "Internship",
+    "skills": [
+      "Looker",
+      "Kubernetes",
+      "dbt",
+      "NumPy",
+      "R"
+    ],
+    "experience_level": "Lead",
+    "salary_range": "AUD $95,000 - $115,000",
+    "description": "Work on building, optimizing, and maintaining modern data systems and pipelines to support analytics and AI initiatives."
+  },
+  {
+    "id": 9,
+    "title": "Quantitative Analyst",
+    "company": "FinSight Partners",
+    "location": "Denver, CO, USA",
+    "employment_type": "Internship",
+    "skills": [
+      "GCP",
+      "SQL",
+      "AWS",
+      "Data Catalog",
+      "Python"
+    ],
+    "experience_level": "Senior",
+    "salary_range": "\u20b918,00,000 - \u20b925,00,000",
+    "description": "Work on building, optimizing, and maintaining modern data systems and pipelines to support analytics and AI initiatives."
+  },
+  {
+    "id": 10,
+    "title": "Data Reliability Engineer",
+    "company": "Omni Technologies",
+    "location": "Denver, CO, USA",
+    "employment_type": "Internship",
+    "skills": [
+      "Data Modeling",
+      "Snowflake",
+      "LangChain",
+      "Kafka",
+      "Pandas"
+    ],
+    "experience_level": "Senior",
+    "salary_range": "AUD $95,000 - $115,000",
+    "description": "Work on building, optimizing, and maintaining modern data systems and pipelines to support analytics and AI initiatives."
+  },
+  {
+    "id": 11,
+    "title": "Data Integration Engineer",
+    "company": "CloudDatum Technologies",
+    "location": "Los Angeles, CA, USA",
+    "employment_type": "Contract",
+    "skills": [
+      "Airflow",
+      "Statistics",
+      "Pandas",
+      "LangChain",
+      "Terraform"
+    ],
+    "experience_level": "Lead",
+    "salary_range": "\u20ac90,000 - \u20ac120,000",
+    "description": "Work on building, optimizing, and maintaining modern data systems and pipelines to support analytics and AI initiatives."
+  },
+  {
+    "id": 12,
+    "title": "BI Developer",
+    "company": "Zenith Dataworks",
+    "location": "Zurich, Switzerland",
+    "employment_type": "Hybrid",
+    "skills": [
+      "PyTorch",
+      "Statistics",
+      "Looker",
+      "Shell Scripting",
+      "TensorFlow"
+    ],
+    "experience_level": "Senior",
+    "salary_range": "$100,000 - $130,000",
+    "description": "Work on building, optimizing, and maintaining modern data systems and pipelines to support analytics and AI initiatives."
+  },
+  {
+    "id": 13,
+    "title": "Data Pipeline Developer",
+    "company": "Lumen AI",
+    "location": "Dublin, Ireland",
+    "employment_type": "Remote",
+    "skills": [
+      "SQL",
+      "Spark",
+      "TensorFlow",
+      "ETL",
+      "Databricks"
+    ],
+    "experience_level": "Entry",
+    "salary_range": "$140,000 - $170,000",
+    "description": "Work on building, optimizing, and maintaining modern data systems and pipelines to support analytics and AI initiatives."
+  },
+  {
+    "id": 14,
+    "title": "Business Intelligence Analyst",
+    "company": "CloudDatum Solutions",
+    "location": "Singapore",
+    "employment_type": "Remote",
+    "skills": [
+      "Databricks",
+      "R",
+      "ETL",
+      "Looker",
+      "NLP"
+    ],
+    "experience_level": "Lead",
+    "salary_range": "$100,000 - $130,000",
+    "description": "Work on building, optimizing, and maintaining modern data systems and pipelines to support analytics and AI initiatives."
+  },
+  {
+    "id": 15,
+    "title": "Deep Learning Engineer",
+    "company": "Omni Labs",
+    "location": "San Francisco, CA, USA",
+    "employment_type": "Contract",
+    "skills": [
+      "Kubernetes",
+      "Shell Scripting",
+      "PyTorch",
+      "Scikit-learn",
+      "Tableau"
+    ],
+    "experience_level": "Lead",
+    "salary_range": "$80,000 - $100,000",
+    "description": "Work on building, optimizing, and maintaining modern data systems and pipelines to support analytics and AI initiatives."
+  },
+  {
+    "id": 16,
+    "title": "Data Analyst",
+    "company": "Lumen Analytics",
+    "location": "Sydney, Australia",
+    "employment_type": "Hybrid",
+    "skills": [
+      "Statistics",
+      "NumPy",
+      "Kubernetes",
+      "Spark",
+      "Python"
+    ],
+    "experience_level": "Senior",
+    "salary_range": "$100,000 - $130,000",
+    "description": "Work on building, optimizing, and maintaining modern data systems and pipelines to support analytics and AI initiatives."
+  },
+  {
+    "id": 17,
+    "title": "Data Quality Analyst",
+    "company": "Omni Systems",
+    "location": "Toronto, Canada",
+    "employment_type": "Contract",
+    "skills": [
+      "Fivetran",
+      "dbt",
+      "Data Modeling",
+      "Data Governance",
+      "LangChain"
+    ],
+    "experience_level": "Senior",
+    "salary_range": "$120,000 - $150,000",
+    "description": "Work on building, optimizing, and maintaining modern data systems and pipelines to support analytics and AI initiatives."
+  },
+  {
+    "id": 18,
+    "title": "Data Governance Lead",
+    "company": "Neura Solutions",
+    "location": "Denver, CO, USA",
+    "employment_type": "Internship",
+    "skills": [
+      "AWS",
+      "NumPy",
+      "ETL",
+      "Azure",
+      "Data Catalog"
+    ],
+    "experience_level": "Lead",
+    "salary_range": "\u20b918,00,000 - \u20b925,00,000",
+    "description": "Work on building, optimizing, and maintaining modern data systems and pipelines to support analytics and AI initiatives."
+  },
+  {
+    "id": 19,
+    "title": "Data Engineer Intern",
+    "company": "Nimbus Analytics",
+    "location": "Denver, CO, USA",
+    "employment_type": "Hybrid",
+    "skills": [
+      "Statistics",
+      "Shell Scripting",
+      "Snowflake",
+      "Tableau",
+      "Docker"
+    ],
+    "experience_level": "Senior",
+    "salary_range": "$140,000 - $170,000",
+    "description": "Work on building, optimizing, and maintaining modern data systems and pipelines to support analytics and AI initiatives."
+  },
+  {
+    "id": 20,
+    "title": "Data Product Manager",
+    "company": "Omni Technologies",
+    "location": "Paris, France",
+    "employment_type": "Contract",
+    "skills": [
+      "Fivetran",
+      "ETL",
+      "Data Quality",
+      "Azure",
+      "PyTorch"
+    ],
+    "experience_level": "Lead",
+    "salary_range": "$100,000 - $130,000",
+    "description": "Work on building, optimizing, and maintaining modern data systems and pipelines to support analytics and AI initiatives."
+  },
+  {
+    "id": 21,
+    "title": "Data Governance Specialist",
+    "company": "Omni Metrics",
+    "location": "Dublin, Ireland",
+    "employment_type": "Remote",
+    "skills": [
+      "Azure",
+      "Snowflake",
+      "Looker",
+      "LangChain",
+      "Kubernetes"
+    ],
+    "experience_level": "Entry",
+    "salary_range": "\u20ac90,000 - \u20ac120,000",
+    "description": "Work on building, optimizing, and maintaining modern data systems and pipelines to support analytics and AI initiatives."
+  },
+  {
+    "id": 22,
+    "title": "Data Science Manager",
+    "company": "FinSight Systems",
+    "location": "Singapore",
+    "employment_type": "Internship",
+    "skills": [
+      "NumPy",
+      "LangChain",
+      "Kubernetes",
+      "Excel",
+      "PyTorch"
+    ],
+    "experience_level": "Mid",
+    "salary_range": "$140,000 - $170,000",
+    "description": "Work on building, optimizing, and maintaining modern data systems and pipelines to support analytics and AI initiatives."
+  },
+  {
+    "id": 23,
+    "title": "Data Platform Engineer",
+    "company": "FinSight AI",
+    "location": "San Francisco, CA, USA",
+    "employment_type": "Remote",
+    "skills": [
+      "Git",
+      "Pandas",
+      "Airflow",
+      "Kafka",
+      "Excel"
+    ],
+    "experience_level": "Senior",
+    "salary_range": "AUD $95,000 - $115,000",
+    "description": "Work on building, optimizing, and maintaining modern data systems and pipelines to support analytics and AI initiatives."
+  },
+  {
+    "id": 24,
+    "title": "Data Scientist",
+    "company": "Lumen Metrics",
+    "location": "Tokyo, Japan",
+    "employment_type": "Contract",
+    "skills": [
+      "NLP",
+      "dbt",
+      "TensorFlow",
+      "Fivetran",
+      "R"
+    ],
+    "experience_level": "Lead",
+    "salary_range": "\u00a360,000 - \u00a385,000",
+    "description": "Work on building, optimizing, and maintaining modern data systems and pipelines to support analytics and AI initiatives."
+  },
+  {
+    "id": 25,
+    "title": "Statistician",
+    "company": "Nimbus Dataworks",
+    "location": "London, UK",
+    "employment_type": "Internship",
+    "skills": [
+      "PyTorch",
+      "Statistics",
+      "Power BI",
+      "Databricks",
+      "BigQuery"
+    ],
+    "experience_level": "Senior",
+    "salary_range": "\u20b918,00,000 - \u20b925,00,000",
+    "description": "Work on building, optimizing, and maintaining modern data systems and pipelines to support analytics and AI initiatives."
+  },
+  {
+    "id": 26,
+    "title": "Data Engineer",
+    "company": "Streamly Metrics",
+    "location": "Paris, France",
+    "employment_type": "Contract",
+    "skills": [
+      "Pandas",
+      "Git",
+      "AWS",
+      "Tableau",
+      "GCP"
+    ],
+    "experience_level": "Lead",
+    "salary_range": "AUD $95,000 - $115,000",
+    "description": "Work on building, optimizing, and maintaining modern data systems and pipelines to support analytics and AI initiatives."
+  },
+  {
+    "id": 27,
+    "title": "ML Ops Engineer",
+    "company": "Omni AI",
+    "location": "Remote - Global",
+    "employment_type": "Full-time",
+    "skills": [
+      "LangChain",
+      "Kubernetes",
+      "LLMs",
+      "Databricks",
+      "Git"
+    ],
+    "experience_level": "Senior",
+    "salary_range": "$120,000 - $150,000",
+    "description": "Work on building, optimizing, and maintaining modern data systems and pipelines to support analytics and AI initiatives."
+  },
+  {
+    "id": 28,
+    "title": "AI Engineer",
+    "company": "Streamly Labs",
+    "location": "London, UK",
+    "employment_type": "Remote",
+    "skills": [
+      "LangChain",
+      "Looker",
+      "Azure",
+      "Statistics",
+      "NumPy"
+    ],
+    "experience_level": "Mid",
+    "salary_range": "\u20b918,00,000 - \u20b925,00,000",
+    "description": "Work on building, optimizing, and maintaining modern data systems and pipelines to support analytics and AI initiatives."
+  },
+  {
+    "id": 29,
+    "title": "Data Scientist",
+    "company": "Streamly Partners",
+    "location": "Tokyo, Japan",
+    "employment_type": "Contract",
+    "skills": [
+      "Data Governance",
+      "dbt",
+      "Docker",
+      "TensorFlow",
+      "Spark"
+    ],
+    "experience_level": "Mid",
+    "salary_range": "$80,000 - $100,000",
+    "description": "Work on building, optimizing, and maintaining modern data systems and pipelines to support analytics and AI initiatives."
+  },
+  {
+    "id": 30,
+    "title": "Quantitative Analyst",
+    "company": "Streamly Metrics",
+    "location": "Boston, MA, USA",
+    "employment_type": "Internship",
+    "skills": [
+      "R",
+      "dbt",
+      "Tableau",
+      "Terraform",
+      "Spark"
+    ],
+    "experience_level": "Senior",
+    "salary_range": "\u20b918,00,000 - \u20b925,00,000",
+    "description": "Work on building, optimizing, and maintaining modern data systems and pipelines to support analytics and AI initiatives."
+  },
+  {
+    "id": 31,
+    "title": "Data Integration Engineer",
+    "company": "Omni Metrics",
+    "location": "Singapore",
+    "employment_type": "Full-time",
+    "skills": [
+      "LLMs",
+      "dbt",
+      "PyTorch",
+      "Tableau",
+      "Data Governance"
+    ],
+    "experience_level": "Lead",
+    "salary_range": "$100,000 - $130,000",
+    "description": "Work on building, optimizing, and maintaining modern data systems and pipelines to support analytics and AI initiatives."
+  },
+  {
+    "id": 32,
+    "title": "ETL Developer",
+    "company": "Nimbus Analytics",
+    "location": "Seattle, WA, USA",
+    "employment_type": "Internship",
+    "skills": [
+      "Airflow",
+      "BigQuery",
+      "Spark",
+      "Terraform",
+      "Tableau"
+    ],
+    "experience_level": "Mid",
+    "salary_range": "$120,000 - $150,000",
+    "description": "Work on building, optimizing, and maintaining modern data systems and pipelines to support analytics and AI initiatives."
+  },
+  {
+    "id": 33,
+    "title": "Data Governance Lead",
+    "company": "Omni AI",
+    "location": "San Francisco, CA, USA",
+    "employment_type": "Remote",
+    "skills": [
+      "Shell Scripting",
+      "AWS",
+      "SQL",
+      "NumPy",
+      "Data Quality"
+    ],
+    "experience_level": "Mid",
+    "salary_range": "\u00a360,000 - \u00a385,000",
+    "description": "Work on building, optimizing, and maintaining modern data systems and pipelines to support analytics and AI initiatives."
+  },
+  {
+    "id": 34,
+    "title": "Data Architect (Azure)",
+    "company": "Insight Labs",
+    "location": "Denver, CO, USA",
+    "employment_type": "Hybrid",
+    "skills": [
+      "AWS",
+      "NumPy",
+      "dbt",
+      "ETL",
+      "Snowflake"
+    ],
+    "experience_level": "Lead",
+    "salary_range": "$100,000 - $130,000",
+    "description": "Work on building, optimizing, and maintaining modern data systems and pipelines to support analytics and AI initiatives."
+  },
+  {
+    "id": 35,
+    "title": "Data Warehouse Engineer",
+    "company": "Lumen Systems",
+    "location": "Paris, France",
+    "employment_type": "Contract",
+    "skills": [
+      "Pandas",
+      "Data Catalog",
+      "NumPy",
+      "Fivetran",
+      "Statistics"
+    ],
+    "experience_level": "Senior",
+    "salary_range": "\u20b918,00,000 - \u20b925,00,000",
+    "description": "Work on building, optimizing, and maintaining modern data systems and pipelines to support analytics and AI initiatives."
+  },
+  {
+    "id": 36,
+    "title": "ETL Specialist",
+    "company": "Lumen Metrics",
+    "location": "Singapore",
+    "employment_type": "Full-time",
+    "skills": [
+      "GCP",
+      "Data Quality",
+      "Docker",
+      "Statistics",
+      "Scikit-learn"
+    ],
+    "experience_level": "Mid",
+    "salary_range": "$80,000 - $100,000",
+    "description": "Work on building, optimizing, and maintaining modern data systems and pipelines to support analytics and AI initiatives."
+  },
+  {
+    "id": 37,
+    "title": "Data Scientist",
+    "company": "CloudDatum AI",
+    "location": "Zurich, Switzerland",
+    "employment_type": "Contract",
+    "skills": [
+      "Terraform",
+      "Looker",
+      "SQL",
+      "Kubernetes",
+      "Kafka"
+    ],
+    "experience_level": "Entry",
+    "salary_range": "$100,000 - $130,000",
+    "description": "Work on building, optimizing, and maintaining modern data systems and pipelines to support analytics and AI initiatives."
+  },
+  {
+    "id": 38,
+    "title": "Data Visualization Specialist",
+    "company": "FinSight Technologies",
+    "location": "Dublin, Ireland",
+    "employment_type": "Internship",
+    "skills": [
+      "NLP",
+      "Data Quality",
+      "Kubernetes",
+      "Git",
+      "R"
+    ],
+    "experience_level": "Lead",
+    "salary_range": "$120,000 - $150,000",
+    "description": "Work on building, optimizing, and maintaining modern data systems and pipelines to support analytics and AI initiatives."
+  },
+  {
+    "id": 39,
+    "title": "Big Data Engineer",
+    "company": "Nimbus Dataworks",
+    "location": "Boston, MA, USA",
+    "employment_type": "Internship",
+    "skills": [
+      "Pandas",
+      "LangChain",
+      "Docker",
+      "NLP",
+      "dbt"
+    ],
+    "experience_level": "Senior",
+    "salary_range": "\u20b918,00,000 - \u20b925,00,000",
+    "description": "Work on building, optimizing, and maintaining modern data systems and pipelines to support analytics and AI initiatives."
+  },
+  {
+    "id": 40,
+    "title": "Data Engineer Intern",
+    "company": "Nimbus Systems",
+    "location": "Bangalore, India",
+    "employment_type": "Hybrid",
+    "skills": [
+      "BigQuery",
+      "R",
+      "TensorFlow",
+      "Terraform",
+      "Snowflake"
+    ],
+    "experience_level": "Lead",
+    "salary_range": "\u00a360,000 - \u00a385,000",
+    "description": "Work on building, optimizing, and maintaining modern data systems and pipelines to support analytics and AI initiatives."
+  },
+  {
+    "id": 41,
+    "title": "Data Engineer",
+    "company": "Insight Labs",
+    "location": "Tokyo, Japan",
+    "employment_type": "Remote",
+    "skills": [
+      "GCP",
+      "Databricks",
+      "Docker",
+      "Kubernetes",
+      "LangChain"
+    ],
+    "experience_level": "Senior",
+    "salary_range": "\u20b918,00,000 - \u20b925,00,000",
+    "description": "Work on building, optimizing, and maintaining modern data systems and pipelines to support analytics and AI initiatives."
+  },
+  {
+    "id": 42,
+    "title": "AI Engineer",
+    "company": "Streamly Technologies",
+    "location": "Seattle, WA, USA",
+    "employment_type": "Hybrid",
+    "skills": [
+      "Data Catalog",
+      "Terraform",
+      "NumPy",
+      "Kafka",
+      "Shell Scripting"
+    ],
+    "experience_level": "Lead",
+    "salary_range": "\u20ac90,000 - \u20ac120,000",
+    "description": "Work on building, optimizing, and maintaining modern data systems and pipelines to support analytics and AI initiatives."
+  },
+  {
+    "id": 43,
+    "title": "Data Scientist",
+    "company": "Omni Labs",
+    "location": "Sydney, Australia",
+    "employment_type": "Internship",
+    "skills": [
+      "dbt",
+      "TensorFlow",
+      "Kafka",
+      "Spark",
+      "SQL"
+    ],
+    "experience_level": "Senior",
+    "salary_range": "\u20ac90,000 - \u20ac120,000",
+    "description": "Work on building, optimizing, and maintaining modern data systems and pipelines to support analytics and AI initiatives."
+  },
+  {
+    "id": 44,
+    "title": "Head of Data",
+    "company": "Insight Dataworks",
+    "location": "Seattle, WA, USA",
+    "employment_type": "Contract",
+    "skills": [
+      "TensorFlow",
+      "Data Quality",
+      "Spark",
+      "Kafka",
+      "LangChain"
+    ],
+    "experience_level": "Senior",
+    "salary_range": "\u20ac90,000 - \u20ac120,000",
+    "description": "Work on building, optimizing, and maintaining modern data systems and pipelines to support analytics and AI initiatives."
+  },
+  {
+    "id": 45,
+    "title": "Analytics Engineer",
+    "company": "Omni Studio",
+    "location": "Paris, France",
+    "employment_type": "Contract",
+    "skills": [
+      "Power BI",
+      "Azure",
+      "GCP",
+      "Data Catalog",
+      "Docker"
+    ],
+    "experience_level": "Lead",
+    "salary_range": "$100,000 - $130,000",
+    "description": "Work on building, optimizing, and maintaining modern data systems and pipelines to support analytics and AI initiatives."
+  },
+  {
+    "id": 46,
+    "title": "Data Reliability Engineer",
+    "company": "FinSight Metrics",
+    "location": "Sydney, Australia",
+    "employment_type": "Remote",
+    "skills": [
+      "Spark",
+      "Azure",
+      "Looker",
+      "LLMs",
+      "Data Modeling"
+    ],
+    "experience_level": "Entry",
+    "salary_range": "$80,000 - $100,000",
+    "description": "Work on building, optimizing, and maintaining modern data systems and pipelines to support analytics and AI initiatives."
+  },
+  {
+    "id": 47,
+    "title": "Junior Data Engineer",
+    "company": "Aurora Metrics",
+    "location": "Remote - Global",
+    "employment_type": "Hybrid",
+    "skills": [
+      "Kafka",
+      "AWS",
+      "Data Governance",
+      "BigQuery",
+      "Fivetran"
+    ],
+    "experience_level": "Entry",
+    "salary_range": "\u20ac90,000 - \u20ac120,000",
+    "description": "Work on building, optimizing, and maintaining modern data systems and pipelines to support analytics and AI initiatives."
+  },
+  {
+    "id": 48,
+    "title": "Business Intelligence Analyst",
+    "company": "Omni Dataworks",
+    "location": "San Francisco, CA, USA",
+    "employment_type": "Contract",
+    "skills": [
+      "SQL",
+      "Excel",
+      "Fivetran",
+      "Scikit-learn",
+      "ETL"
+    ],
+    "experience_level": "Mid",
+    "salary_range": "\u20ac90,000 - \u20ac120,000",
+    "description": "Work on building, optimizing, and maintaining modern data systems and pipelines to support analytics and AI initiatives."
+  },
+  {
+    "id": 49,
+    "title": "Data Reliability Engineer",
+    "company": "Omni Metrics",
+    "location": "Bangalore, India",
+    "employment_type": "Hybrid",
+    "skills": [
+      "AWS",
+      "ETL",
+      "Fivetran",
+      "GCP",
+      "R"
+    ],
+    "experience_level": "Entry",
+    "salary_range": "\u00a360,000 - \u00a385,000",
+    "description": "Work on building, optimizing, and maintaining modern data systems and pipelines to support analytics and AI initiatives."
+  },
+  {
+    "id": 50,
+    "title": "Data Modeler",
+    "company": "Lumen Solutions",
+    "location": "San Francisco, CA, USA",
+    "employment_type": "Contract",
+    "skills": [
+      "SQL",
+      "Data Governance",
+      "Azure",
+      "Terraform",
+      "Power BI"
+    ],
+    "experience_level": "Senior",
+    "salary_range": "\u00a360,000 - \u00a385,000",
+    "description": "Work on building, optimizing, and maintaining modern data systems and pipelines to support analytics and AI initiatives."
+  }
+]
