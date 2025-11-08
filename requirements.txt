@@ -5,3 +5,5 @@ python-dotenv
 jinja2
 pubnub
 openai
+requests
+PyGithub
