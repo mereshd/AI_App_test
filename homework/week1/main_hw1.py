@@ -1,4 +1,12 @@
-from fastapi import FastAPI, Request
+import sys
+from pathlib import Path
+
+# Add project root to Python path
+project_root = Path(__file__).parent.parent.parent
+sys.path.insert(0, str(project_root))
+
+
+from fastapi import FastAPI, Request, UploadFile, File
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -6,19 +14,22 @@ from supabase import create_client, Client
 from pubnub.pnconfiguration import PNConfiguration
 from pubnub.pubnub import PubNub
 from openai import OpenAI
+from typing import Optional
+import base64
 import os
 import json
 import datetime
+import io
 
 from supabase_lib import query_rag_content, query_rag_content_many_types
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv(dotenv_path=project_root / ".env")
 
 app = FastAPI()
 
-# Setup templates
-templates = Jinja2Templates(directory="templates")
+# Setup templates with correct path
+templates = Jinja2Templates(directory=str(project_root / "templates"))
 
 # Supabase client
 supabase_url = os.environ.get("SUPABASE_URL")
@@ -387,12 +398,6 @@ async def resume_with_matching_page(request: Request):
     return templates.TemplateResponse("resume_with_matching.html", {"request": request})
 
 
-@app.get("/resume-with-matching-pubnub", response_class=HTMLResponse)
-async def resume_with_matching_pubnub_page(request: Request):
-    """Render the resume parser page"""
-    return templates.TemplateResponse("resume_with_matching_pubnub.html", {"request": request})
-
-
 @app.post('/api/parse-resume-with-matching')
 async def parse_resume_with_matching(request: Request):
     """Parse HTML resume/LinkedIn profile using OpenAI"""
@@ -555,143 +560,185 @@ Remove any HTML tags, navigation elements, or extraneous information."""
 
 
 
-@app.post('/api/parse-resume-with-matching-pubnub')
-async def parse_resume_with_matching(request: Request):
-    body = await request.json()
-    html_content = body.get("html_content", "")
-    resume_job = insert_resume_job({'resume_text': html_content})
-
-    # Publish to the same channel that pubnub_job_processor is listening to
-    job_channel = os.environ.get("PUBNUB_JOB_CHANNEL", "job-requests")
-
-    envelope = pubnub_client.publish() \
-        .channel(job_channel) \
-        .message({'id': resume_job['id']}) \
-        .sync()
-
-    return {'message': 'Started Pubnub job', 'job_id': resume_job['id']}
-
 
 
 
 @app.post("/api/parse-resume")
-async def parse_resume(request: Request):
-    """Parse HTML resume/LinkedIn profile using OpenAI"""
+async def parse_resume(
+    request: Request,
+    file: Optional[UploadFile] = File(None)
+):
+    """Parse resume from HTML text, image file, or PDF file"""
     if not openai_client:
-        print("❌ OpenAI client not configured.")
-        return {"error": "OpenAI API key not configured. Please add OPENAI_API_KEY to your .env file."}
+        return {"error": "OpenAI API key not configured."}
 
     try:
-        print("🟦 STEP 1: Reading request body...")
-        body = await request.json()
-        html_content = body.get("html_content", "")
-        print(f"✅ Received HTML content length: {len(html_content)} characters")
-
-        if not html_content:
-            print("❌ No HTML content provided.")
-            return {"error": "No HTML content provided"}
-
-        # Prompt construction
-        print("🟦 STEP 2: Constructing system and user prompts...")
-        system_prompt = "You are a structured information extraction assistant."
-        user_prompt = f"Extract key fields from this resume/profile HTML:\n\n{html_content}"
-        print("✅ Prompts ready.")
-
-        # Tool schema
-        print("🟦 STEP 3: Defining key_parsed_elements tool schema...")
-        key_parsed_elements_tool = {
-    "type": "function",
-    "function": {
-        "name": "key_parsed_elements",
-        "description": (
-            "Parses resume or LinkedIn HTML/text and extracts exactly three fields — "
-            "name, header, and location — returning a clean JSON object.\n\n"
-            "The output must be a single JSON object with the following keys:\n"
-            "• name: The candidate's full name as it appears at the top of the resume/profile.\n"
-            "• header: The person's professional headline or short title (e.g., 'Data Engineer @ Wafra | MS in Applied Data Science').\n"
-            "• location: The current city or region (e.g., 'New York City Metropolitan Area').\n\n"
-            "Remove HTML tags, navigation items, and noise before extraction."
-        ),
-        "parameters": {
-            "type": "object",
-            "properties": {
-                "name": {
-                    "type": "string",
-                    "description": (
-                        "The candidate's full name (usually top of resume or LinkedIn profile). "
-                        "Exclude prefixes like Mr., Ms., Dr."
-                    )
-                },
-                "header": {
-                    "type": "string",
-                    "description": (
-                        "Professional headline or job title describing the person’s role or expertise. "
-                        "Examples: 'Software Engineer at Google', 'Data Scientist | AI Research'."
-                    )
-                },
-                "location": {
-                    "type": "string",
-                    "description": (
-                        "Geographic area or city listed in the profile. Examples: "
-                        "'New York City Metropolitan Area', 'San Francisco Bay Area'."
-                    )
-                },
-            },
-            "required": ["name", "header", "location"]
-        }
-    }
-}
-
-        print("✅ Tool schema defined.")
-
-        # Call OpenAI API
-        print("🟦 STEP 4: Calling OpenAI API (model=gpt-5)...")
-        completion = openai_client.chat.completions.create(
-            model="gpt-5",
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_prompt},
-            ],
-            temperature=1,
-            tools=[key_parsed_elements_tool],
-            tool_choice={"type": "function", "function": {"name": "key_parsed_elements"}},
-        )
-
-        print("✅ OpenAI API call completed.")
-        print(f"🧾 Raw completion response keys: {list(completion.model_dump().keys())}")
-
-        # Extract structured output
-        print("🟦 STEP 5: Parsing OpenAI structured response...")
-        message = completion.choices[0].message
-        if hasattr(message, "tool_calls") and message.tool_calls:
-            tool_call = message.tool_calls[0]
-            args_json = tool_call.function.arguments
-            print(f"📜 Raw arguments string: {args_json}")
-            parsed_resume = json.loads(args_json)
-            print(f"✅ Parsed JSON: {parsed_resume}")
-        elif message.content:
-            print("⚠️ No tool call found, falling back to content parsing...")
-            try:
-                parsed_resume = json.loads(message.content)
-            except json.JSONDecodeError:
-                print(f"❌ Could not decode JSON from message.content: {message.content}")
-                parsed_resume = {"raw_output": message.content}
+        content_type = request.headers.get("content-type", "")
+        
+        # Handle JSON body (HTML text input)
+        if "application/json" in content_type:
+            body = await request.json()
+            html_content = body.get("html_content", "")
+            
+            if not html_content:
+                return {"error": "No HTML content provided"}
+            
+            print("📝 Processing HTML text input...")
+            
+            messages = [
+                {"role": "system", "content": "Extract name, header, and location from resumes."},
+                {"role": "user", "content": f"Extract the name, professional header, and location from this resume HTML:\n\n{html_content}"}
+            ]
+            
+            content_type_used = "html"
+            filename_used = "html_input"
+        
+        # Handle file upload
+        elif file:
+            print(f"🟦 Processing uploaded file: {file.filename}, content_type: {file.content_type}")
+            
+            file_bytes = await file.read()
+            
+            messages = [
+                {"role": "system", "content": "Extract name, header, and location from resumes."}
+            ]
+            
+            # Handle PDFs - pass base64-encoded PDF directly to chat.completions
+            if file.content_type == "application/pdf" or file.filename.lower().endswith(".pdf"):
+                print("📄 Processing PDF with Chat Completions API...")
+            
+                # Wrap BytesIO in a tuple with filename and MIME type
+                uploaded_file = openai_client.files.create(
+                    file=("resume.pdf", io.BytesIO(file_bytes), "application/pdf"),
+                    purpose="assistants"   # ✅ correct purpose
+                )
+            
+                print(f"✅ Uploaded PDF to OpenAI with ID: {uploaded_file.id}")
+            
+                # Reference uploaded file correctly in the message
+                messages.append({
+                    "role": "user",
+                    "content": [
+                        {
+                            "type": "text",
+                            "text": "Extract the name, professional header, and location from this resume PDF."
+                        },
+                        {
+                            "type": "file",
+                            "file": {
+                                "file_id": uploaded_file.id   # ✅ correct format
+                            }
+                        }
+                    ]
+                })
+            
+                content_type_used = file.content_type
+                filename_used = file.filename
+            
+            # Handle images - base64 encode on server
+            elif file.content_type and file.content_type.startswith('image/'):
+                print("📸 Base64 encoding image on server...")
+                
+                base64_image = base64.b64encode(file_bytes).decode('utf-8')
+                image_format = file.content_type.split('/')[-1]
+                image_data_url = f"data:image/{image_format};base64,{base64_image}"
+                
+                messages.append({
+                    "role": "user",
+                    "content": [
+                        {"type": "text", "text": "Extract name, header, and location."},
+                        {"type": "image_url", "image_url": {"url": image_data_url}}
+                    ]
+                })
+                content_type_used = file.content_type
+                filename_used = file.filename
+            else:
+                return {"error": f"Unsupported file type: {file.content_type}"}
+        
         else:
-            print("❌ No valid tool_calls or content in response.")
-            return {"error": "No valid output from OpenAI response."}
-
-        # Insert into Supabase
+            return {"error": "No file or HTML content provided"}
+        
+        # Tool schema for structured output
+        key_parsed_elements_tool = {
+            "type": "function",
+            "function": {
+                "name": "key_parsed_elements",
+                "description": "Extract name, header, and location from resume",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "name": {"type": "string", "description": "Full name"},
+                        "header": {"type": "string", "description": "Professional headline"},
+                        "location": {"type": "string", "description": "Location"}
+                    },
+                    "required": ["name", "header", "location"]
+                }
+            }
+        }
+        
+        # SINGLE CALL to chat.completions with PDF content
+        completion = openai_client.chat.completions.create(
+            model="gpt-4o",  # Vision-capable model that supports PDFs
+            messages=messages,
+            temperature=0.3,
+            tools=[key_parsed_elements_tool],
+            tool_choice={"type": "function", "function": {"name": "key_parsed_elements"}}
+        )
+        
+        # Extract structured output
+        if not completion.choices[0].message.tool_calls:
+            return {"error": "No structured data returned"}
+        
+        tool_call = completion.choices[0].message.tool_calls[0]
+        parsed_resume = json.loads(tool_call.function.arguments)
+        
+        print(f"✅ Parsed resume: {parsed_resume}")
+        
+        # Insert into database
         insert_result = insert_parsed_profile(parsed_resume)
-
-        print("✅ All steps complete. Returning response.")
+        
         return {
             "parsed_resume": parsed_resume,
-            "insert_result": insert_result
+            "insert_result": insert_result,
+            "filename": filename_used,
+            "content_type": content_type_used
         }
-
+    
     except Exception as e:
-        print(f"❌ Unhandled exception in /api/parse-resume: {e}")
-        return {"error": f"Error parsing resume: {str(e)}"}
+        import traceback
+        traceback.print_exc()
+        print(f"❌ Error: {e}")
+        return {"error": f"Error: {str(e)}"}
+
+
+
+def insert_parsed_profile(profile_data: dict):
+    """
+    Inserts a parsed profile with name, header, and location into Supabase.
+    """
+    print("🟧 Inserting into Supabase...")
+    required_keys = ["name", "header", "location"]
+    for key in required_keys:
+        if key not in profile_data:
+            print(f"❌ Missing required key: {key}")
+            return {"error": f"Missing required field: {key}"}
+
+    row = {
+        "name": profile_data["name"],
+        "header": profile_data["header"],
+        "location": profile_data["location"],
+        "created_at": datetime.datetime.utcnow().isoformat()
+    }
+
+    try:
+        print(f"📤 Inserting row into Supabase: {row}")
+        response = supabase.table("parsed_profiles").insert(row).execute()
+        print("✅ Supabase insert successful.")
+        return {"success": True, "data": response.data}
+    except Exception as e:
+        print(f"❌ Supabase insert failed: {e}")
+        return {"error": str(e)}
+
 
 
 
@@ -729,78 +776,12 @@ def insert_resume(resume_json: dict) -> dict:
         raise
 
 
-def insert_parsed_profile(profile_data: dict):
-    """
-    For /api/parse-resume
-    @app.post("/api/parse-resume")
-    
-    Inserts a parsed profile with name, header, and location into Supabase.
-    
-    Args:
-        profile_data (dict): Must contain 'name', 'header', 'location'
-    
-    Returns:
-        dict: Success response with data or error message
-    """
-    print("🟧 Inserting into Supabase...")
-    required_keys = ["name", "header", "location"]
-    for key in required_keys:
-        if key not in profile_data:
-            print(f"❌ Missing required key: {key}")
-            return {"error": f"Missing required field: {key}"}
 
-    row = {
-        "name": profile_data["name"],
-        "header": profile_data["header"],
-        "location": profile_data["location"],
-        "created_at": datetime.datetime.utcnow().isoformat()
-    }
-
-    try:
-        print(f"📤 Inserting row into Supabase: {row}")
-        response = supabase.table("parsed_profiles").insert(row).execute()
-        print("✅ Supabase insert successful.")
-        return {"success": True, "data": response.data}
-    except Exception as e:
-        print(f"❌ Supabase insert failed: {e}")
-        return {"error": str(e)}
-
-
-def insert_resume_job(resume_job_json: dict) -> dict:
-    """
-    Inserts a parsed resume JSON object into the Supabase 'resumes' table.
-
-    Args:
-        resume_json (dict): Resume data matching the JSON schema.
-
-    Returns:
-        dict: The inserted row data from Supabase.
-    """
-    # Ensure valid JSON
-    if not isinstance(resume_job_json, dict):
-        raise ValueError("resume_json must be a Python dict")
-
-    try:
-        response = (
-            supabase.table("resume_job")
-            .insert({"resume_text": resume_job_json['resume_text']})
-            .execute()
-        )
-
-        if response.data:
-            print("✅ Resume inserted successfully!")
-            return response.data[0]
-        else:
-            raise Exception(f"Insertion failed: {response}")
-
-    except Exception as e:
-        print(f"❌ Error inserting resume: {e}")
-        raise
 
 
 
 if __name__ == "__main__":
     import uvicorn
     port = int(os.environ.get("PORT", 8000))
-    uvicorn.run("main:app", host="0.0.0.0", port=port)
+    uvicorn.run("main_hw1:app", host="0.0.0.0", port=port)
 

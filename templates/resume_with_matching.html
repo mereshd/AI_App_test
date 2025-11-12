@@ -146,6 +146,10 @@
             border-radius: 10px;
             overflow-y: auto;
             min-height: 400px;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-size: 13px;
         }
 
         .output-box.empty {
@@ -222,32 +226,6 @@
             60%, 100% { content: '...'; }
         }
 
-        .parsed-content {
-            line-height: 1.6;
-            color: #333;
-        }
-
-        .parsed-content h2 {
-            color: #667eea;
-            border-bottom: 2px solid #667eea;
-            padding-bottom: 5px;
-            margin-top: 20px;
-        }
-
-        .parsed-content h3 {
-            color: #764ba2;
-            margin-top: 15px;
-        }
-
-        .parsed-content ul {
-            margin: 10px 0;
-            padding-left: 25px;
-        }
-
-        .parsed-content li {
-            margin: 5px 0;
-        }
-
         @media (max-width: 900px) {
             .content-wrapper {
                 grid-template-columns: 1fr;
@@ -317,7 +295,7 @@
         const resultsSection = document.getElementById('results-section');
         const jobsResults = document.getElementById('jobs-results');
         const profilesResults = document.getElementById('profiles-results');
-        let parsedText = '';
+        let parsedData = null;
 
         async function parseResume() {
             const htmlContent = htmlInput.value.trim();
@@ -335,6 +313,7 @@
             outputBox.innerHTML = 'Parsing resume<span class="loading-dots"></span>';
             parseBtn.disabled = true;
             actionButtons.style.display = 'none';
+            resultsSection.style.display = 'none';
 
             try {
                 const response = await fetch('/api/parse-resume-with-matching', {
@@ -345,11 +324,8 @@
                     body: JSON.stringify({ html_content: htmlContent })
                 });
 
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-
                 const data = await response.json();
+                console.log('API Response:', data);
                 
                 if (data.error) {
                     showError(data.error);
@@ -357,8 +333,12 @@
                     outputBox.innerHTML = 'Parsed resume will appear here...';
                     resultsSection.style.display = 'none';
                 } else {
-                    parsedText = data.parsed_resume;
-                    displayParsedResume(parsedText);
+                    parsedData = data.parsed_resume;
+                    
+                    // Display raw JSON
+                    outputBox.className = 'output-box';
+                    outputBox.textContent = JSON.stringify(data.parsed_resume, null, 2);
+                    
                     displayJobs(data.jobs || []);
                     displayProfiles(data.profiles || []);
                     actionButtons.style.display = 'flex';
@@ -366,26 +346,13 @@
                 }
             } catch (error) {
                 console.error('Error:', error);
-                showError('Failed to parse resume. Please check your OpenAI API key and try again.');
+                showError(`Failed to parse resume: ${error.message}`);
                 outputBox.className = 'output-box empty';
                 outputBox.innerHTML = 'Parsed resume will appear here...';
+                resultsSection.style.display = 'none';
             } finally {
                 parseBtn.disabled = false;
             }
-        }
-
-        function displayParsedResume(content) {
-            outputBox.className = 'output-box';
-
-            // Convert markdown-like formatting to HTML
-            let formattedContent = content
-                .replace(/\n/g, '<br>')
-                .replace(/## (.*?)<br>/g, '<h2>$1</h2>')
-                .replace(/### (.*?)<br>/g, '<h3>$1</h3>')
-                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                .replace(/\*(.*?)\*/g, '<em>$1</em>');
-
-            outputBox.innerHTML = `<div class="parsed-content">${formattedContent}</div>`;
         }
 
         function displayJobs(jobs) {
@@ -430,10 +397,12 @@
         }
 
         async function copyToClipboard() {
-            if (!parsedText) return;
+            if (!parsedData) return;
 
             try {
-                await navigator.clipboard.writeText(parsedText);
+                const jsonString = JSON.stringify(parsedData, null, 2);
+                await navigator.clipboard.writeText(jsonString);
+                
                 // Temporarily change button text
                 const btn = event.target;
                 const originalText = btn.textContent;
@@ -451,7 +420,7 @@
             outputBox.className = 'output-box empty';
             outputBox.innerHTML = 'Parsed resume will appear here...';
             actionButtons.style.display = 'none';
-            parsedText = '';
+            parsedData = null;
             errorContainer.innerHTML = '';
             resultsSection.style.display = 'none';
             jobsResults.innerHTML = '<div class="empty-results">No matching jobs found</div>';
