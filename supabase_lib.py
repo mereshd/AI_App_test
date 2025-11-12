@@ -29,6 +29,7 @@ def query_rag_content_many_types(query_embedding, match_count, document_types):
         }
     ).execute()
     return rag_results
+
 def insert_resume(resume_json: dict) -> dict:
     """
     Inserts a parsed resume JSON object into the Supabase 'resumes' table.

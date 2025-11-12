@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PubNub Ping Pong</title>
+    <script src="https://cdn.pubnub.com/sdk/javascript/pubnub.7.4.0.js"></script>
+    <style>
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+                'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+                sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            width: 90%;
+        }
+
+        h1 {
+            text-align: center;
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .status {
+            text-align: center;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .status.connected {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .status.disconnected {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .status.waiting {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        button {
+            background-color: #667eea;
+            border: none;
+            color: white;
+            padding: 15px 30px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 10px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        button:hover:not(:disabled) {
+            background-color: #764ba2;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        .message-container {
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .message {
+            padding: 10px 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.ping {
+            background-color: #e3f2fd;
+            border-left: 4px solid #2196f3;
+        }
+
+        .message.pong {
+            background-color: #f3e5f5;
+            border-left: 4px solid #9c27b0;
+        }
+
+        .message.system {
+            background-color: #fff9c4;
+            border-left: 4px solid #fbc02d;
+            font-style: italic;
+        }
+
+        .message-content {
+            margin: 0;
+            font-size: 14px;
+        }
+
+        .message-time {
+            font-size: 11px;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Ping Pong</h1>
+        <p class="subtitle">Real-time messaging with PubNub</p>
+
+        <div id="status" class="status disconnected">
+            Disconnected
+        </div>
+
+        <div class="controls">
+            <button id="connectBtn" onclick="connect()">Connect to PubNub</button>
+            <button id="pingBtn" onclick="sendPing()" disabled>Send Ping</button>
+            <button id="clearBtn" onclick="clearMessages()">Clear Messages</button>
+        </div>
+
+        <div class="message-container" id="messages">
+            <div class="message system">
+                <p class="message-content">Click "Connect to PubNub" to start</p>
+            </div>
+        </div>
+
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-value" id="pingCount">0</div>
+                <div class="stat-label">Pings Sent</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="pongCount">0</div>
+                <div class="stat-label">Pongs Received</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let pubnub;
+        let isConnected = false;
+        let pingCount = 0;
+        let pongCount = 0;
+        const channel = 'pingpong-channel';
+
+        // These should be replaced with your actual PubNub keys
+        // In production, get these from your backend or environment
+        const PUBNUB_PUBLISH_KEY = '{{ pubnub_publish_key }}';
+        const PUBNUB_SUBSCRIBE_KEY = '{{ pubnub_subscribe_key }}';
+
+        function connect() {
+            if (isConnected) {
+                disconnect();
+                return;
+            }
+
+            try {
+                pubnub = new PubNub({
+                    publishKey: PUBNUB_PUBLISH_KEY,
+                    subscribeKey: PUBNUB_SUBSCRIBE_KEY,
+                    userId: 'user-' + Math.random().toString(36).substr(2, 9)
+                });
+
+                // Add listener for incoming messages
+                pubnub.addListener({
+                    message: function(event) {
+                        handleMessage(event.message);
+                    },
+                    status: function(statusEvent) {
+                        if (statusEvent.category === "PNConnectedCategory") {
+                            updateStatus('connected', 'Connected to PubNub');
+                            document.getElementById('pingBtn').disabled = false;
+                            document.getElementById('connectBtn').textContent = 'Disconnect';
+                            addSystemMessage('Successfully connected to PubNub');
+                        }
+                    }
+                });
+
+                // Subscribe to the channel
+                pubnub.subscribe({
+                    channels: [channel]
+                });
+
+                isConnected = true;
+
+            } catch (error) {
+                console.error('Connection error:', error);
+                addSystemMessage('Error connecting to PubNub: ' + error.message);
+                updateStatus('disconnected', 'Connection Failed');
+            }
+        }
+
+        function disconnect() {
+            if (pubnub) {
+                pubnub.unsubscribeAll();
+                pubnub = null;
+            }
+            isConnected = false;
+            document.getElementById('pingBtn').disabled = true;
+            document.getElementById('connectBtn').textContent = 'Connect to PubNub';
+            updateStatus('disconnected', 'Disconnected');
+            addSystemMessage('Disconnected from PubNub');
+        }
+
+        function sendPing() {
+            if (!isConnected || !pubnub) {
+                addSystemMessage('Not connected to PubNub');
+                return;
+            }
+
+            const message = {
+                type: 'ping',
+                timestamp: new Date().toISOString()
+            };
+
+            pubnub.publish({
+                channel: channel,
+                message: message
+            }).then(() => {
+                pingCount++;
+                document.getElementById('pingCount').textContent = pingCount;
+                addMessage('ping', 'Ping sent!');
+            }).catch((error) => {
+                console.error('Publish error:', error);
+                addSystemMessage('Error sending ping: ' + error.message);
+            });
+        }
+
+        function handleMessage(message) {
+            if (message.type === 'ping') {
+                // Auto-respond with pong
+                setTimeout(() => {
+                    sendPong();
+                }, 500);
+            } else if (message.type === 'pong') {
+                pongCount++;
+                document.getElementById('pongCount').textContent = pongCount;
+                addMessage('pong', 'Pong received!');
+            }
+        }
+
+        function sendPong() {
+            if (!isConnected || !pubnub) return;
+
+            const message = {
+                type: 'pong',
+                timestamp: new Date().toISOString()
+            };
+
+            pubnub.publish({
+                channel: channel,
+                message: message
+            }).then(() => {
+                addMessage('pong', 'Pong sent!');
+            }).catch((error) => {
+                console.error('Publish error:', error);
+            });
+        }
+
+        function addMessage(type, content) {
+            const messagesContainer = document.getElementById('messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message ' + type;
+
+            const now = new Date();
+            const timeString = now.toLocaleTimeString();
+
+            messageDiv.innerHTML = `
+                <p class="message-content">${content}</p>
+                <div class="message-time">${timeString}</div>
+            `;
+
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function addSystemMessage(content) {
+            addMessage('system', content);
+        }
+
+        function updateStatus(status, text) {
+            const statusDiv = document.getElementById('status');
+            statusDiv.className = 'status ' + status;
+            statusDiv.textContent = text;
+        }
+
+        function clearMessages() {
+            const messagesContainer = document.getElementById('messages');
+            messagesContainer.innerHTML = '<div class="message system"><p class="message-content">Messages cleared</p></div>';
+            pingCount = 0;
+            pongCount = 0;
+            document.getElementById('pingCount').textContent = '0';
+            document.getElementById('pongCount').textContent = '0';
+        }
+    </script>
+</body>
+</html>
